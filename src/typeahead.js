@@ -8,7 +8,7 @@
   var cache = {}, viewKey = 'ttView', methods;
 
   methods = {
-    initialize: function(datasetDefs) {
+    initialize: function(datasetDefs, options) {
       var datasets;
 
       datasetDefs = utils.isArray(datasetDefs) ? datasetDefs : [datasetDefs];
@@ -27,6 +27,8 @@
         return dataset;
       });
 
+      options = options || {};
+
       return this.each(initialize);
 
       function initialize() {
@@ -41,7 +43,8 @@
         $input.data(viewKey, new TypeaheadView({
           input: $input,
           eventBus: eventBus = new EventBus({ el: $input }),
-          datasets: datasets
+          datasets: datasets,
+          options: options
         }));
 
         $.when.apply($, deferreds)

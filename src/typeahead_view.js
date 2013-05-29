@@ -62,13 +62,16 @@ var TypeaheadView = (function() {
 
     utils.bindAll(this);
 
-    this.$node = buildDomStructure(o.input);
+    this.$attachTo = $(o.options.attachTo);
+    this.$node = buildDomStructure(o.input, this.$attachTo);
     this.datasets = o.datasets;
     this.dir = null;
 
     this.eventBus = o.eventBus;
 
-    $menu = this.$node.find('.tt-dropdown-menu');
+    $menuParent = (this.$attachTo.length > 0 ? this.$attachTo : this.$node);
+
+    $menu = $menuParent.find('.tt-dropdown-menu');
     $input = this.$node.find('.tt-query');
     $hint = this.$node.find('.tt-hint');
 
@@ -269,7 +272,7 @@ var TypeaheadView = (function() {
       this.inputView.destroy();
       this.dropdownView.destroy();
 
-      destroyDomStructure(this.$node);
+      destroyDomStructure(this.$node, this.$attachTo);
 
       this.$node = null;
     },
@@ -286,11 +289,12 @@ var TypeaheadView = (function() {
 
   return TypeaheadView;
 
-  function buildDomStructure(input) {
+  function buildDomStructure(input, attachTo) {
     var $wrapper = $(html.wrapper),
         $dropdown = $(html.dropdown),
         $input = $(input),
-        $hint = $(html.hint);
+        $hint = $(html.hint),
+        $attachTo = $(attachTo);
 
     $wrapper = $wrapper.css(css.wrapper);
     $dropdown = $dropdown.css(css.dropdown);
@@ -327,14 +331,21 @@ var TypeaheadView = (function() {
     // it does not like it one bit
     try { !$input.attr('dir') && $input.attr('dir', 'auto'); } catch (e) {}
 
-    return $input
+    var $parent = $input
     .wrap($wrapper)
     .parent()
-    .prepend($hint)
-    .append($dropdown);
+    .prepend($hint);
+
+    if ($attachTo.length > 0) {
+      $attachTo.append($dropdown);
+    } else {
+      $parent.append($dropdown);
+    }
+
+    return $parent;
   }
 
-  function destroyDomStructure($node) {
+  function destroyDomStructure($node, $attachTo) {
     var $input = $node.find('.tt-query');
 
     // need to remove attrs that weren't previously defined and
@@ -350,5 +361,6 @@ var TypeaheadView = (function() {
     .insertAfter($node);
 
     $node.remove();
+    $attachTo.find('.tt-dropdown-menu').remove();
   }
 })();

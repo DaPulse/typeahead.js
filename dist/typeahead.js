@@ -888,11 +888,13 @@
         function TypeaheadView(o) {
             var $menu, $input, $hint;
             utils.bindAll(this);
-            this.$node = buildDomStructure(o.input);
+            this.$attachTo = $(o.options.attachTo);
+            this.$node = buildDomStructure(o.input, this.$attachTo);
             this.datasets = o.datasets;
             this.dir = null;
             this.eventBus = o.eventBus;
-            $menu = this.$node.find(".tt-dropdown-menu");
+            $menuParent = this.$attachTo.length > 0 ? this.$attachTo : this.$node;
+            $menu = $menuParent.find(".tt-dropdown-menu");
             $input = this.$node.find(".tt-query");
             $hint = this.$node.find(".tt-hint");
             this.dropdownView = new DropdownView({
@@ -1009,7 +1011,7 @@
             destroy: function() {
                 this.inputView.destroy();
                 this.dropdownView.destroy();
-                destroyDomStructure(this.$node);
+                destroyDomStructure(this.$node, this.$attachTo);
                 this.$node = null;
             },
             setQuery: function(query) {
@@ -1021,8 +1023,8 @@
             }
         });
         return TypeaheadView;
-        function buildDomStructure(input) {
-            var $wrapper = $(html.wrapper), $dropdown = $(html.dropdown), $input = $(input), $hint = $(html.hint);
+        function buildDomStructure(input, attachTo) {
+            var $wrapper = $(html.wrapper), $dropdown = $(html.dropdown), $input = $(input), $hint = $(html.hint), $attachTo = $(attachTo);
             $wrapper = $wrapper.css(css.wrapper);
             $dropdown = $dropdown.css(css.dropdown);
             $hint.css(css.hint).css({
@@ -1048,21 +1050,28 @@
             try {
                 !$input.attr("dir") && $input.attr("dir", "auto");
             } catch (e) {}
-            return $input.wrap($wrapper).parent().prepend($hint).append($dropdown);
+            var $parent = $input.wrap($wrapper).parent().prepend($hint);
+            if ($attachTo.length > 0) {
+                $attachTo.append($dropdown);
+            } else {
+                $parent.append($dropdown);
+            }
+            return $parent;
         }
-        function destroyDomStructure($node) {
+        function destroyDomStructure($node, $attachTo) {
             var $input = $node.find(".tt-query");
             utils.each($input.data("ttAttrs"), function(key, val) {
                 utils.isUndefined(val) ? $input.removeAttr(key) : $input.attr(key, val);
             });
             $input.detach().removeData("ttAttrs").removeClass("tt-query").insertAfter($node);
             $node.remove();
+            $attachTo.find(".tt-dropdown-menu").remove();
         }
     }();
     (function() {
         var cache = {}, viewKey = "ttView", methods;
         methods = {
-            initialize: function(datasetDefs) {
+            initialize: function(datasetDefs, options) {
                 var datasets;
                 datasetDefs = utils.isArray(datasetDefs) ? datasetDefs : [ datasetDefs ];
                 if (datasetDefs.length === 0) {
@@ -1075,6 +1084,7 @@
                     }
                     return dataset;
                 });
+                options = options || {};
                 return this.each(initialize);
                 function initialize() {
                     var $input = $(this), deferreds, eventBus = new EventBus({
@@ -1088,7 +1098,8 @@
                         eventBus: eventBus = new EventBus({
                             el: $input
                         }),
-                        datasets: datasets
+                        datasets: datasets,
+                        options: options
                     }));
                     $.when.apply($, deferreds).always(function() {
                         utils.defer(function() {

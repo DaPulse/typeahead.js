@@ -24,11 +24,14 @@ describe('TypeaheadView', function() {
     this.typeaheadView = new TypeaheadView({
       input: this.$input,
       eventBus: new EventBus({ el: this.$input }),
-      datasets: mockDatasets
+      datasets: mockDatasets,
+      options: {}
     });
 
     this.inputView = this.typeaheadView.inputView;
     this.dropdownView = this.typeaheadView.dropdownView;
+
+    this.$attachTo = $('<div>').appendTo($('div').parent());
 
     // spy on all inputView and dropdownView public methods
     [this.inputView, this.dropdownView].forEach(spyOnPublicMethods);
@@ -510,6 +513,29 @@ describe('TypeaheadView', function() {
       it('should not update input value', function() {
         expect(this.inputView.setInputValue).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('when attaching dropdown to other element', function() {
+    beforeEach(function() {
+      this.$attachTo.empty();
+
+      this.typeaheadView = new TypeaheadView({
+        input: this.$input,
+        eventBus: new EventBus({ el: this.$input }),
+        datasets: mockDatasets,
+        options: {attachTo: this.$attachTo}
+      });
+    });
+
+    it('should build dropdown under attachTo element', function() {
+      expect(this.$attachTo.find('.tt-dropdown-menu')).toExist();
+    })
+
+    it('should remove dropdown from attachTo element when destroyed', function() {
+      this.typeaheadView.destroy();
+
+      expect(this.$attachTo.find('.tt-dropdown-menu')).not.toExist();
     });
   });
 
