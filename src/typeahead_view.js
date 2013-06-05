@@ -88,7 +88,7 @@ var TypeaheadView = (function() {
 
     this.inputView = new InputView({ input: $input, hint: $hint })
     .on('focused', this._openDropdown)
-    .on('blured', this._closeDropdown)
+    // .on('blured', this._closeDropdown)
     .on('blured', this._setInputValueToQuery)
     .on('enterKeyed', this._handleSelection)
     .on('queryChanged', this._clearHint)
