@@ -393,7 +393,7 @@
             this.adjacencyList = {};
             this.storage = o.name ? new PersistentStorage(o.name) : null;
         }
-        utils.mixin(Dataset.prototype, {
+        utils.mixin(Dataset.prototype, EventTarget, {
             _processLocalData: function(data) {
                 this._mergeProcessedData(this._processData(data));
             },
@@ -538,6 +538,9 @@
                         !isDuplicate && suggestions.push(item);
                         return suggestions.length < that.limit;
                     });
+                    if (suggestions.length === 0) {
+                        that.trigger("no_results", that.name);
+                    }
                     cb && cb(suggestions);
                 }
             }
@@ -1076,8 +1079,13 @@
                 if (datasetDefs.length === 0) {
                     $.error("no datasets provided");
                 }
+                var eventBus = new EventBus({
+                    el: $(this)
+                });
                 datasets = utils.map(datasetDefs, function(o) {
-                    var dataset = cache[o.name] ? cache[o.name] : new Dataset(o);
+                    var dataset = cache[o.name] ? cache[o.name] : new Dataset(o).on("no_results", function(e, data) {
+                        eventBus.trigger("no_results", e, data);
+                    });
                     if (o.name) {
                         cache[o.name] = dataset;
                     }

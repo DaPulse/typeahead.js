@@ -44,7 +44,7 @@ var Dataset = (function() {
     this.storage = o.name ? new PersistentStorage(o.name) : null;
   }
 
-  utils.mixin(Dataset.prototype, {
+  utils.mixin(Dataset.prototype, EventTarget, {
 
     // private methods
     // ---------------
@@ -268,6 +268,7 @@ var Dataset = (function() {
       // in the event loop
       !cacheHit && cb && cb(suggestions);
 
+
       // callback for transport.get
       function processRemoteData(data) {
         suggestions = suggestions.slice(0);
@@ -287,6 +288,10 @@ var Dataset = (function() {
           // the remote results and can break out of the each loop
           return suggestions.length < that.limit;
         });
+
+        if (suggestions.length === 0) {
+          that.trigger('no_results', that.name);
+        }
 
         cb && cb(suggestions);
       }

@@ -17,8 +17,10 @@
         $.error('no datasets provided');
       }
 
+      var eventBus = new EventBus({ el: $(this) });
+
       datasets = utils.map(datasetDefs, function(o) {
-        var dataset = cache[o.name] ? cache[o.name] :  new Dataset(o);
+        var dataset = cache[o.name] ? cache[o.name] :  new Dataset(o).on('no_results', function(e, data){eventBus.trigger('no_results', e, data)});
 
         if (o.name) {
           cache[o.name] = dataset;
