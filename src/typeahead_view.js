@@ -217,8 +217,8 @@ var TypeaheadView = (function() {
         byClick ? this.inputView.focus() : e.data.preventDefault();
 
         // focus is not a synchronous event in ie, so we deal with it
-        byClick && utils.isMsie() ?
-          utils.defer(this.dropdownView.close) : this.dropdownView.close();
+        // byClick && utils.isMsie() ?
+        //   utils.defer(this.dropdownView.close) : this.dropdownView.close();
 
         this.eventBus.trigger('selected', suggestion.datum);
       }
@@ -227,7 +227,7 @@ var TypeaheadView = (function() {
     _getSuggestions: function() {
       var that = this, query = this.inputView.getQuery();
 
-      if (utils.isBlankString(query)) { return; }
+      // if (utils.isBlankString(query)) { return; }
 
       utils.each(this.datasets, function(i, dataset) {
         dataset.getSuggestions(query, function(suggestions) {

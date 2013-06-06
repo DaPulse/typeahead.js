@@ -381,7 +381,7 @@
             }
             this.name = o.name || utils.getUniqueId();
             this.limit = o.limit || 5;
-            this.minLength = o.minLength || 1;
+            this.minLength = o.minLength != null ? o.minLength : 1;
             this.header = o.header;
             this.footer = o.footer;
             this.valueKey = o.valueKey || "value";
@@ -971,15 +971,11 @@
                 if (suggestion) {
                     this.inputView.setInputValue(suggestion.value);
                     byClick ? this.inputView.focus() : e.data.preventDefault();
-                    byClick && utils.isMsie() ? utils.defer(this.dropdownView.close) : this.dropdownView.close();
                     this.eventBus.trigger("selected", suggestion.datum);
                 }
             },
             _getSuggestions: function() {
                 var that = this, query = this.inputView.getQuery();
-                if (utils.isBlankString(query)) {
-                    return;
-                }
                 utils.each(this.datasets, function(i, dataset) {
                     dataset.getSuggestions(query, function(suggestions) {
                         if (query === that.inputView.getQuery()) {
