@@ -795,6 +795,32 @@
             moveCursorDown: function() {
                 this._moveCursor(+1);
             },
+            moveCursorRight: function() {
+                var that = this;
+                var suggestions = this._getSuggestions();
+                var underCursor = suggestions.filter(function(i, d) {
+                    return $(d).data("suggestion").value == that.getSuggestionUnderCursor().value;
+                });
+                var nextSuggestion = $(underCursor).parent().parent().nextAll().find(".tt-suggestion").first();
+                if (nextSuggestion.length == 0) {
+                    return;
+                }
+                var delta = suggestions.index(nextSuggestion) - suggestions.index(underCursor);
+                this._moveCursor(delta);
+            },
+            moveCursorLeft: function() {
+                var that = this;
+                var suggestions = this._getSuggestions();
+                var underCursor = suggestions.filter(function(i, d) {
+                    return $(d).data("suggestion").value == that.getSuggestionUnderCursor().value;
+                });
+                var prevSuggestion = $(underCursor).parent().parent().prevAll().find(".tt-suggestion").last().siblings().first();
+                if (prevSuggestion.length == 0) {
+                    return;
+                }
+                var delta = suggestions.index(prevSuggestion) - suggestions.index(underCursor);
+                this._moveCursor(delta);
+            },
             getSuggestionUnderCursor: function() {
                 var $suggestion = this._getSuggestions().filter(".tt-is-under-cursor").first();
                 return $suggestion.length > 0 ? extractSuggestion($suggestion) : null;
@@ -906,7 +932,7 @@
             this.inputView = new InputView({
                 input: $input,
                 hint: $hint
-            }).on("focused", this._openDropdown).on("blured", this._setInputValueToQuery).on("enterKeyed", this._handleSelection).on("queryChanged", this._clearHint).on("queryChanged", this._clearSuggestions).on("queryChanged", this._getSuggestions).on("whitespaceChanged", this._updateHint).on("queryChanged whitespaceChanged", this._openDropdown).on("queryChanged whitespaceChanged", this._setLanguageDirection).on("escKeyed", this._closeDropdown).on("escKeyed", this._setInputValueToQuery).on("tabKeyed upKeyed downKeyed", this._managePreventDefault).on("upKeyed downKeyed", this._moveDropdownCursor).on("upKeyed downKeyed", this._openDropdown).on("tabKeyed leftKeyed rightKeyed", this._autocomplete);
+            }).on("focused", this._openDropdown).on("blured", this._setInputValueToQuery).on("enterKeyed", this._handleSelection).on("queryChanged", this._clearHint).on("queryChanged", this._clearSuggestions).on("queryChanged", this._getSuggestions).on("whitespaceChanged", this._updateHint).on("queryChanged whitespaceChanged", this._openDropdown).on("queryChanged whitespaceChanged", this._setLanguageDirection).on("escKeyed", this._closeDropdown).on("escKeyed", this._setInputValueToQuery).on("tabKeyed upKeyed downKeyed", this._managePreventDefault).on("upKeyed downKeyed rightKeyed leftKeyed", this._moveDropdownCursor).on("upKeyed downKeyed", this._openDropdown).on("tabKeyed leftKeyed rightKeyed", this._autocomplete);
         }
         utils.mixin(TypeaheadView.prototype, EventTarget, {
             _managePreventDefault: function(e) {
@@ -966,7 +992,20 @@
             _moveDropdownCursor: function(e) {
                 var $e = e.data;
                 if (!$e.shiftKey && !$e.ctrlKey && !$e.metaKey) {
-                    this.dropdownView[e.type === "upKeyed" ? "moveCursorUp" : "moveCursorDown"]();
+                    switch (e.type) {
+                      case "upKeyed":
+                      case "downKeyed":
+                        this.dropdownView[e.type === "upKeyed" ? "moveCursorUp" : "moveCursorDown"]();
+                        break;
+
+                      case "rightKeyed":
+                        this.dropdownView.moveCursorRight();
+                        break;
+
+                      case "leftKeyed":
+                        this.dropdownView.moveCursorLeft();
+                        break;
+                    }
                 }
             },
             _handleSelection: function(e) {

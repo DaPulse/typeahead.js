@@ -100,7 +100,7 @@ var TypeaheadView = (function() {
     .on('escKeyed', this._closeDropdown)
     .on('escKeyed', this._setInputValueToQuery)
     .on('tabKeyed upKeyed downKeyed', this._managePreventDefault)
-    .on('upKeyed downKeyed', this._moveDropdownCursor)
+    .on('upKeyed downKeyed rightKeyed leftKeyed', this._moveDropdownCursor)
     .on('upKeyed downKeyed', this._openDropdown)
     .on('tabKeyed leftKeyed rightKeyed', this._autocomplete);
   }
@@ -197,8 +197,19 @@ var TypeaheadView = (function() {
       var $e = e.data;
 
       if (!$e.shiftKey && !$e.ctrlKey && !$e.metaKey) {
-        this.dropdownView[e.type === 'upKeyed' ?
-          'moveCursorUp' : 'moveCursorDown']();
+        switch (e.type) {
+          case 'upKeyed':
+          case 'downKeyed':
+            this.dropdownView[e.type === 'upKeyed' ?
+              'moveCursorUp' : 'moveCursorDown']();
+            break;
+          case 'rightKeyed':
+            this.dropdownView.moveCursorRight();
+            break;
+          case 'leftKeyed':
+            this.dropdownView.moveCursorLeft();
+            break;
+        }
       }
     },
 

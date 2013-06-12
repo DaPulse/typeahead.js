@@ -161,6 +161,40 @@ var DropdownView = (function() {
       this._moveCursor(+1);
     },
 
+    moveCursorRight: function() {
+      var that = this;
+      var suggestions = this._getSuggestions();
+      var underCursor = suggestions.filter(function(i, d) {
+        return $(d).data('suggestion').value == that.getSuggestionUnderCursor().value;
+      })
+
+      var nextSuggestion = $(underCursor).parent().parent().nextAll().find('.tt-suggestion').first();
+      if (nextSuggestion.length == 0) {
+        return;
+      }
+
+      var delta = suggestions.index(nextSuggestion) - suggestions.index(underCursor);
+
+      this._moveCursor(delta);
+    },
+
+    moveCursorLeft: function() {
+      var that = this;
+      var suggestions = this._getSuggestions();
+      var underCursor = suggestions.filter(function(i, d) {
+        return $(d).data('suggestion').value == that.getSuggestionUnderCursor().value;
+      })
+
+      var prevSuggestion = $(underCursor).parent().parent().prevAll().find('.tt-suggestion').last().siblings().first();
+      if (prevSuggestion.length == 0) {
+        return;
+      }
+
+      var delta = suggestions.index(prevSuggestion) - suggestions.index(underCursor);
+
+      this._moveCursor(delta);
+    },
+
     getSuggestionUnderCursor: function() {
       var $suggestion = this._getSuggestions()
           .filter('.tt-is-under-cursor')
