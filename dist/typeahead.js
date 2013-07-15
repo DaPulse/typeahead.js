@@ -706,6 +706,7 @@
             this.isOpen = false;
             this.isEmpty = true;
             this.isMouseOverDropdown = false;
+            this.position = 0;
             this.$menu = $(o.menu).on("mouseenter.tt", this._handleMouseenter).on("mouseleave.tt", this._handleMouseleave).on("click.tt", ".tt-suggestion", this._handleSelection).on("mouseover.tt", ".tt-suggestion", this._handleMouseover);
         }
         utils.mixin(DropdownView.prototype, EventTarget, {
@@ -730,10 +731,13 @@
             _hide: function() {
                 this.$menu.hide();
             },
-            _moveCursor: function(increment) {
+            _moveCursor: function(increment, subliminal) {
                 var $suggestions, $cur, nextIndex, $underCursor;
                 if (!this.isVisible()) {
                     return;
+                }
+                if (!subliminal) {
+                    this.position += increment;
                 }
                 $suggestions = this._getSuggestions();
                 $cur = $suggestions.filter(".tt-is-under-cursor");
@@ -747,7 +751,9 @@
                     nextIndex = $suggestions.length - 1;
                 }
                 $underCursor = $suggestions.eq(nextIndex).addClass("tt-is-under-cursor");
-                this.trigger("cursorMoved", extractSuggestion($underCursor));
+                if (!subliminal) {
+                    this.trigger("cursorMoved", extractSuggestion($underCursor));
+                }
             },
             _getSuggestions: function() {
                 return this.$menu.find(".tt-suggestions > .tt-suggestion");
@@ -755,6 +761,7 @@
             destroy: function() {
                 this.$menu.off(".tt");
                 this.$menu = null;
+                this.position = 0;
             },
             isVisible: function() {
                 return this.isOpen && !this.isEmpty;
@@ -852,6 +859,10 @@
                     $dataset.show().find(".tt-suggestions").html(fragment);
                 } else {
                     this.clearSuggestions(dataset.name);
+                }
+                if (dataset.name == "pulses") {
+                    this._moveCursor(this.position, true);
+                    this.position = 0;
                 }
                 this.trigger("suggestionsRendered");
             },

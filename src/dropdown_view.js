@@ -24,6 +24,8 @@ var DropdownView = (function() {
     this.isEmpty = true;
     this.isMouseOverDropdown = false;
 
+    this.position = 0;
+
     this.$menu = $(o.menu)
     .on('mouseenter.tt', this._handleMouseenter)
     .on('mouseleave.tt', this._handleMouseleave)
@@ -65,12 +67,16 @@ var DropdownView = (function() {
       this.$menu.hide();
     },
 
-    _moveCursor: function(increment) {
+    _moveCursor: function(increment, subliminal) {
       var $suggestions, $cur, nextIndex, $underCursor;
 
       // don't bother moving the cursor if the menu is closed or empty
       if (!this.isVisible()) {
         return;
+      }
+
+      if (!subliminal) {
+        this.position += increment;
       }
 
       $suggestions = this._getSuggestions();
@@ -94,7 +100,9 @@ var DropdownView = (function() {
       }
 
       $underCursor = $suggestions.eq(nextIndex).addClass('tt-is-under-cursor');
-      this.trigger('cursorMoved', extractSuggestion($underCursor));
+      if (!subliminal) {
+        this.trigger('cursorMoved', extractSuggestion($underCursor));
+      }
     },
 
     _getSuggestions: function() {
@@ -108,6 +116,8 @@ var DropdownView = (function() {
       this.$menu.off('.tt');
 
       this.$menu = null;
+
+      this.position = 0;
     },
 
     isVisible: function() {
@@ -262,6 +272,12 @@ var DropdownView = (function() {
       // no suggestions to render
       else {
         this.clearSuggestions(dataset.name);
+      }
+
+      // Dapulse specific hack
+      if (dataset.name == 'pulses') {
+        this._moveCursor(this.position, true);
+        this.position = 0;
       }
 
       this.trigger('suggestionsRendered');
