@@ -842,24 +842,20 @@
                     $suggestionsList = $(html.suggestionsList).css(css.suggestionsList);
                     $dataset = $("<div></div>").addClass(datasetClassName).append(dataset.header).append($suggestionsList).append(dataset.footer).appendTo(this.$menu);
                 }
-                if (suggestions.length > 0) {
-                    this.isEmpty = false;
-                    this.isOpen && this._show();
-                    elBuilder = document.createElement("div");
-                    fragment = document.createDocumentFragment();
-                    utils.each(suggestions, function(i, suggestion) {
-                        compiledHtml = dataset.template(suggestion.datum);
-                        elBuilder.innerHTML = wrapper.replace("%body", compiledHtml);
-                        $el = $(elBuilder.firstChild).css(css.suggestion).data("suggestion", suggestion);
-                        $el.children().each(function() {
-                            $(this).css(css.suggestionChild);
-                        });
-                        fragment.appendChild($el[0]);
+                this.isEmpty = false;
+                this.isOpen && this._show();
+                elBuilder = document.createElement("div");
+                fragment = document.createDocumentFragment();
+                utils.each(suggestions, function(i, suggestion) {
+                    compiledHtml = dataset.template(suggestion.datum);
+                    elBuilder.innerHTML = wrapper.replace("%body", compiledHtml);
+                    $el = $(elBuilder.firstChild).css(css.suggestion).data("suggestion", suggestion);
+                    $el.children().each(function() {
+                        $(this).css(css.suggestionChild);
                     });
-                    $dataset.show().find(".tt-suggestions").html(fragment);
-                } else {
-                    this.clearSuggestions(dataset.name);
-                }
+                    fragment.appendChild($el[0]);
+                });
+                $dataset.show().find(".tt-suggestions").html(fragment);
                 if (dataset.name == "pulses") {
                     this._moveCursor(this.position, true);
                     this.position = 0;

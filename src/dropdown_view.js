@@ -241,8 +241,8 @@ var DropdownView = (function() {
         .appendTo(this.$menu);
       }
 
-      // suggestions to be rendered
-      if (suggestions.length > 0) {
+      // // suggestions to be rendered
+      // if (suggestions.length > 0) {
         this.isEmpty = false;
         this.isOpen && this._show();
 
@@ -267,12 +267,12 @@ var DropdownView = (function() {
         // show this dataset in case it was previously empty
         // and render the new suggestions
         $dataset.show().find('.tt-suggestions').html(fragment);
-      }
+      // }
 
       // no suggestions to render
-      else {
-        this.clearSuggestions(dataset.name);
-      }
+      // else {
+      //   this.clearSuggestions(dataset.name);
+      // }
 
       // Dapulse specific hack
       if (dataset.name == 'pulses') {
